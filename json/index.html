@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+    <style>
+        #issmap{
+            width: 600px;
+            height: 400px;
+            position: relative;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p>
+            Latitude : <span id="lat"></span><br>
+            Longitude: <span id="lon"></span>
+        </p>
+    </div>
+  <div id="issmap"></div>
+    <script>
+        const map = L.map('issmap').setView([0, 0], 1);
+        const Icon = L.icon({
+            iconUrl: 'icon.png',
+            iconSize: [80, 52],
+            iconAnchor: [40, 26],
+});
+        const marker = L.marker([0, 0],{icon : Icon}).addTo(map);
+        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">Openstreetmap</a> contributors'
+
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const tiles = L.tileLayer(tileUrl, {attribution});
+        tiles.addTo(map);
+        const iss ='https://api.wheretheiss.at/v1/satellites/25544';
+
+        let first = true;
+
+        async function getData(){
+            const response = await fetch(iss)
+            const data = await response.json();
+            const {latitude, longitude} = data;
+            marker.setLatLng([latitude,longitude]);
+           if(first){
+            map.setView([latitude,longitude], 2);
+            first = false;
+           }
+            document.getElementById('lat').textContent = latitude.toFixed(2);
+            document.getElementById('lon').textContent = longitude.toFixed(2);
+        };
+        getData();
+
+        setInterval(getData,1000);
+    </script>
+</body>
+</html>
